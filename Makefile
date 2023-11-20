@@ -9,9 +9,11 @@ ML_OBJ = activation_function.ml layer.ml net.ml save_load.ml
 ML_OBJ_FULL_PATH = $(patsubst %.ml, $(ML_DIR)/obj/%.ml, $(ML_OBJ))
 
 # Train objects
-TRAIN_OBJ = main.o
+TRAIN_OBJ = main.o funcs.o
 TRAIN_OBJ_FULL_PATH = $(patsubst %.o, obj/%.o, $(TRAIN_OBJ))
-TARGET = train
+TARGET = train.exe
+BIN_DIR = ./bin
+TARGET_FULL_PATH = $(BIN_DIR)/$(TARGET)
 
 # Comprehensive list of all objects needed to build the target
 ALL_OBJ = $(TRAIN_OBJ_FULL_PATH) $(ML_OBJ_FULL_PATH) $(LA_OBJ_FULL_PATH)
@@ -21,11 +23,11 @@ CXX = g++
 CXXFLAGS = -std=c++23 -Wall -g -O2 -MMD -MP
 
 # Includes
-INCLUDES = -I. -I./inc -I./$(ML_DIR) -I./$(ML_DIR)/inc -I./$(LA_DIR) -I./../confirm/inc -I./../confirm -I./$(LA_DIR)/include
+INCLUDES = -I. -I./inc -I./$(ML_DIR) -I./$(ML_DIR)/inc -I./$(LA_DIR) -I./../UnitTest/ -I./../UnitTest/inc -I./../confirm/inc -I./../confirm -I./$(LA_DIR)/include
 
 # Rule for target
-$(TARGET): $(ALL_OBJ)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(ALL_OBJ) -o $(TARGET)
+$(TARGET_FULL_PATH): $(ALL_OBJ)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(ALL_OBJ) -o $(TARGET_FULL_PATH)
 
 obj/%.o: src/%.cpp inc/%.h
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
@@ -44,7 +46,7 @@ ml:
 
 # By default, only clean the objects from this project
 clean:
-	rm -f $(TRAIN_OBJ) $(TARGET)
+	rm -f $(TRAIN_OBJ) $(TARGET_FULL_PATH)
 
 clean_la:
 	rm -f $(LA_OBJ_FULL_PATH)
@@ -57,12 +59,13 @@ clean_all:
 	$(MAKE) clean_la
 	$(MAKE) clean_ml
 
-all: $(TARGET)
+all: $(TARGET_FULL_PATH)
 
-run: $(TARGET)
-	./$(TARGET).exe
+run: $(TARGET_FULL_PATH)
+	clear
+	$(TARGET_FULL_PATH) $(BIN_DIR)/tmpnet.nn $(BIN_DIR)/linear_dataset.td $(BIN_DIR)/out.nn 100
 
-debug: $(TARGET)
-	gdb $(TARGET).exe
+debug: $(TARGET_FULL_PATH)
+	gdb $(TARGET_FULL_PATH)
 
 .PHONY: clean run all clean_la la ml clean_ml debug
