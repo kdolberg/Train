@@ -1,5 +1,5 @@
 #include "main.h"
-// 
+
 int main(int argc, char const *argv[]) {
 	if (num_args_is_incorrect(argc)) {
 		std::cerr << "Expected " << (EXPECTED_NUM_ARGS-1) << " arguments, but received " << (argc-1) << ".\nExiting.\n";
