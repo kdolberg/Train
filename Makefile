@@ -1,12 +1,12 @@
-# Linear algebra objects
-LA_DIR = ../LinearAlgebra
-LA_OBJ = la_basic_types.la la_matrix.la la_matrix_like.la la_vector.la la_vector_overloads.la
-LA_OBJ_FULL_PATH = $(patsubst la_%.la, obj/la_%.la, $(LA_OBJ))
-
 # MachineLearning objects
-ML_DIR = ../MachineLearning
+ML_DIR = ./MachineLearning
 ML_OBJ = activation_function.ml layer.ml net.ml save_load.ml
 ML_OBJ_FULL_PATH = $(patsubst %.ml, obj/%.ml, $(ML_OBJ))
+
+# Linear algebra objects
+LA_DIR = $(ML_DIR)/LinearAlgebra
+LA_OBJ = la_basic_types.la la_matrix.la la_matrix_like.la la_vector.la la_vector_overloads.la
+LA_OBJ_FULL_PATH = $(patsubst la_%.la, obj/la_%.la, $(LA_OBJ))
 
 # Train objects
 TRAIN_OBJ = main.o funcs.o
@@ -23,7 +23,7 @@ CXX = g++
 CXXFLAGS = -std=c++23 -Wall -g -O2 -MMD -MP
 
 # Includes
-INCLUDES = -I. -I./inc -I./$(ML_DIR) -I./$(ML_DIR)/inc -I./$(LA_DIR) -I./../UnitTest/ -I./../UnitTest/inc -I./../confirm/inc -I./../confirm -I./$(LA_DIR)/include
+INCLUDES = -I. -I./inc -I./$(ML_DIR) -I./$(ML_DIR)/inc -I./../UnitTest/ -I./../UnitTest/inc -I./../confirm/inc -I./../confirm -I./$(LA_DIR)
 
 # Rule for target
 $(TARGET_FULL_PATH): $(ALL_OBJ)

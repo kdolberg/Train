@@ -5,16 +5,24 @@ int main(int argc, char const *argv[]) {
 		std::cerr << "Expected " << (EXPECTED_NUM_ARGS-1) << " arguments, but received " << (argc-1) << ".\nExiting.\n";
 		return 1;
 	}
+	MachineLearning::Net n_prev(MachineLearning::NetDef({1,2,1}));
+	MachineLearning::save(n_prev,"prev.nn");
+	// PRINT_VAR(n_prev);
+	
 	MachineLearning::Net n;
-	if(!MachineLearning::load(n,argv[NET_INDEX])) {
-		std::cerr << "\"" << argv[NET_INDEX] << "\" is not a valid neural net file.\n";
-		return 1;
-	}
-	MachineLearning::TrainingDataset td;
-	if(!MachineLearning::load(td,argv[DATASET_INDEX])) {
-		std::cerr << "\"" << argv[DATASET_INDEX] << "\" is not a valid training dataset file.\n";
-		return 1;
-	}
+	MachineLearning::load(n,"prev.nn");
+	PRINT_VAR(n);
+	PRINT_VAR((n==n_prev));
+	// if(!MachineLearning::load(n,argv[NET_INDEX])) {
+	// 	std::cerr << "\"" << argv[NET_INDEX] << "\" is not a valid neural net file.\n";
+	// 	return 1;
+	// }
+
+	MachineLearning::TrainingDataset td = make_linear_dataset();
+	// if(!MachineLearning::load(td,argv[DATASET_INDEX])) {
+	// 	std::cerr << "\"" << argv[DATASET_INDEX] << "\" is not a valid training dataset file.\n";
+	// 	return 1;
+	// }
 	MachineLearning::uint num_epochs;
 	if(is_integer((const unsigned char *)argv[NUM_ITERATIONS_INDEX])) {
 		num_epochs = atoi(argv[NUM_ITERATIONS_INDEX]);
