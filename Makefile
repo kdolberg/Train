@@ -1,12 +1,12 @@
 # Linear algebra objects
 LA_DIR = ../LinearAlgebra
 LA_OBJ = la_basic_types.la la_matrix.la la_matrix_like.la la_vector.la la_vector_overloads.la
-LA_OBJ_FULL_PATH = $(patsubst la_%.la, $(LA_DIR)/obj/la_%.la, $(LA_OBJ))
+LA_OBJ_FULL_PATH = $(patsubst la_%.la, obj/la_%.la, $(LA_OBJ))
 
 # MachineLearning objects
 ML_DIR = ../MachineLearning
 ML_OBJ = activation_function.ml layer.ml net.ml save_load.ml
-ML_OBJ_FULL_PATH = $(patsubst %.ml, $(ML_DIR)/obj/%.ml, $(ML_OBJ))
+ML_OBJ_FULL_PATH = $(patsubst %.ml, obj/%.ml, $(ML_OBJ))
 
 # Train objects
 TRAIN_OBJ = main.o funcs.o
@@ -32,17 +32,23 @@ $(TARGET_FULL_PATH): $(ALL_OBJ)
 obj/%.o: src/%.cpp inc/%.h
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-$(LA_DIR)/obj/la_%.la:
-	$(MAKE) la
+obj/la_%.la: $(LA_DIR)/src/la_%.cpp $(LA_DIR)/src/la_%.h
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-la:
-	$(MAKE) -C $(LA_DIR) $(patsubst la_%.la, obj/la_%.la, $(LA_OBJ)) CXXFLAGS="$(CXXFLAGS)"
+obj/%.ml: $(ML_DIR)/src/%.cpp $(ML_DIR)/inc/%.h
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-$(ML_DIR)/obj/%.ml:
-	$(MAKE) ml
+# $(LA_DIR)/obj/la_%.la:
+# 	$(MAKE) la
 
-ml:
-	$(MAKE) -C $(ML_DIR) $(patsubst %.ml, obj/%.ml, $(ML_OBJ))
+# la:
+# 	$(MAKE) -C $(LA_DIR) $(patsubst la_%.la, obj/la_%.la, $(LA_OBJ)) CXXFLAGS="$(CXXFLAGS)"
+
+# $(ML_DIR)/obj/%.ml:
+# 	$(MAKE) ml
+
+# ml:
+# 	$(MAKE) -C $(ML_DIR) $(patsubst %.ml, obj/%.ml, $(ML_OBJ))
 
 # By default, only clean the objects from this project
 clean:
@@ -62,10 +68,9 @@ clean_all:
 all: $(TARGET_FULL_PATH)
 
 run: $(TARGET_FULL_PATH)
-	clear
 	$(TARGET_FULL_PATH) $(BIN_DIR)/tmpnet.nn $(BIN_DIR)/linear_dataset.td $(BIN_DIR)/out.nn 100
 
 debug: $(TARGET_FULL_PATH)
-	gdb $(TARGET_FULL_PATH)
+	gdb -x gdb_cmd --args $(TARGET_FULL_PATH) $(BIN_DIR)/tmpnet.nn $(BIN_DIR)/linear_dataset.td $(BIN_DIR)/out.nn 100
 
 .PHONY: clean run all clean_la la ml clean_ml debug
