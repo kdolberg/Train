@@ -1,6 +1,6 @@
 # MachineLearning objects
 ML_DIR = ./MachineLearning
-ML_OBJ = activation_function.ml layer.ml net.ml save_load.ml
+ML_OBJ = activation_function.ml layer.ml net.ml save_load.ml types.ml
 ML_OBJ_FULL_PATH = $(patsubst %.ml, obj/%.ml, $(ML_OBJ))
 
 # Linear algebra objects
