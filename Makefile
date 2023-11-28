@@ -62,4 +62,4 @@ run: $(TARGET_FULL_PATH)
 debug: $(TARGET_FULL_PATH)
 	gdb -x gdb_cmd --args $(TARGET_FULL_PATH) $(BIN_DIR)/tmpnet.nn $(BIN_DIR)/linear_dataset.td $(BIN_DIR)/out.nn 100
 
-.PHONY: clean run all clean_la la ml clean_ml debug
+.PHONY: clean run all clean_la la ml clean_ml debug clean_all
