@@ -4,3 +4,5 @@ obj
 *.exe
 *.stackdump
 *.nn
+inputs/*
+oututs/*
