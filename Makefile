@@ -56,10 +56,13 @@ clean_all:
 
 all: $(TARGET_FULL_PATH)
 
-run: $(TARGET_FULL_PATH)
-	$(TARGET_FULL_PATH) $(BIN_DIR)/tmpnet.nn $(BIN_DIR)/linear_dataset.td $(BIN_DIR)/out.nn 100
+run: $(TARGET_FULL_PATH) clean_saves
+	$(TARGET_FULL_PATH) inputs/prev.nn inputs/dataset.td outputs/out.nn 100
 
 debug: $(TARGET_FULL_PATH)
-	gdb -x gdb_cmd --args $(TARGET_FULL_PATH) $(BIN_DIR)/tmpnet.nn $(BIN_DIR)/linear_dataset.td $(BIN_DIR)/out.nn 100
+	gdb -x gdb_cmd --args $(TARGET_FULL_PATH) inputs/prev.nn inputs/dataset.td outputs/out.nn 100
 
-.PHONY: clean run all clean_la la ml clean_ml debug clean_all
+clean_saves:
+	rm -f outputs/out.nn
+
+.PHONY: clean run all clean_la la ml clean_ml debug clean_all clean_saves
