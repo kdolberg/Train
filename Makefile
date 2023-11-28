@@ -36,19 +36,8 @@ obj/la_%.la: $(LA_DIR)/src/la_%.cpp $(LA_DIR)/src/la_%.h
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 obj/%.ml: $(ML_DIR)/src/%.cpp $(ML_DIR)/inc/%.h
+	@echo "Now building $@"
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-
-# $(LA_DIR)/obj/la_%.la:
-# 	$(MAKE) la
-
-# la:
-# 	$(MAKE) -C $(LA_DIR) $(patsubst la_%.la, obj/la_%.la, $(LA_OBJ)) CXXFLAGS="$(CXXFLAGS)"
-
-# $(ML_DIR)/obj/%.ml:
-# 	$(MAKE) ml
-
-# ml:
-# 	$(MAKE) -C $(ML_DIR) $(patsubst %.ml, obj/%.ml, $(ML_OBJ))
 
 # By default, only clean the objects from this project
 clean:
