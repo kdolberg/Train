@@ -4,13 +4,9 @@ int main(int argc, char const *argv[]) {
 
 	if (argc==1) {
 		std::cout << "No arguments received. Generating synthetic data.\n";
-		MachineLearning::Net n_prev(MachineLearning::NetDef({1,2,1}));
+		MachineLearning::Net n_prev(MachineLearning::NetDef({1,4,1}),true);
 		MachineLearning::save(n_prev,"inputs/prev.nn");
-		LinearAlgebra::Matrix x(MINDEX(1,50)),y(MINDEX(1,50));
-		x.randomize();
-		y.randomize();
-		MachineLearning::TrainingDataset td = {x,y};
-		MachineLearning::save(td,"inputs/dataset.td");
+		MachineLearning::save(make_linear_dataset(),"inputs/dataset.td");
 		return 0;
 	}
 

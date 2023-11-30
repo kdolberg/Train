@@ -10,9 +10,9 @@
 #define DEFAULT_LEARNING_RATE	(0.1f)
 #define a						(0.5f)
 #define b						(0.4f)
-#define NUM_DATAPOINTS			(100)
-#define INIT_COND				(-200.0f)
-#define INCREMENT				(2.0f)
+#define NUM_DATAPOINTS			(20)
+#define INIT_COND				(0.0f)
+#define INCREMENT				((1.0f)/NUM_DATAPOINTS)
 
 #define NET_INDEX				(1)
 #define DATASET_INDEX			(2)
