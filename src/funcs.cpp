@@ -78,6 +78,5 @@ std::string tolower(const char * str) {
 	strcpy(tmp,str);
 	std::locale loc;
 	std::use_facet<std::ctype<char>>(loc).tolower(tmp,tmp+sizeof(tmp));
-	std::cout << tmp;
 	return std::string(tmp);
 }
