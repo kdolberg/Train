@@ -1,4 +1,10 @@
+#include <cctype>
+#include <locale>
 #include "funcs.h"
+
+void print_compile_date() {
+	std::cout << "Compiled " << __DATE__ << " " << __TIME__ << std::endl;
+}
 
 bool is_integer(const unsigned char * s) {
 	for (int i = 0; s[i] != (unsigned char)'\0'; ++i) {
@@ -10,7 +16,7 @@ bool is_integer(const unsigned char * s) {
 }
 
 bool num_args_is_incorrect(int _argc) {
-	return _argc != EXPECTED_NUM_ARGS;
+	return _argc < EXPECTED_NUM_ARGS;
 }
 
 MachineLearning::scalar line(MachineLearning::scalar x) {
@@ -40,4 +46,38 @@ void print_args(int _argc, char const **_argv) {
 		std::cerr << _argv[i] << " ";
 	}
 	std::cerr << std::endl;
+}
+
+#define SCALAR_TO_BOOL(__var__) (((__var__) >= 0.5f) ? true : false)
+
+LinearAlgebra::Matrix XOR(LinearAlgebra::Matrix& m) {
+	assert(m.get_num_rows()==2);
+	assert(m.get_num_cols() > 0);
+	LinearAlgebra::mindex_t dims = m.size();
+	dims.row = 1;
+	LinearAlgebra::Matrix ret(dims);
+
+	for (LinearAlgebra::mindex_t i = {0,0}; i.col < m.get_num_cols(); ++i.col) {
+		ret[i] = (1.0f)*(SCALAR_TO_BOOL(m[MINDEX(0,i.col)]) xor SCALAR_TO_BOOL(m[MINDEX(1,i.col)]));
+	}
+	return ret;
+}
+
+MachineLearning::TrainingDataset make_xor_dataset() {
+	LinearAlgebra::Matrix _x = {{0,0},
+								{0,1},
+								{1,0},
+								{1,1}};
+	LinearAlgebra::Matrix x = LinearAlgebra::transpose(_x);
+	MachineLearning::TrainingDataset ret = {x,XOR(x)};
+	return ret;
+}
+
+std::string tolower(const char * str) {
+	char tmp[strlen(str)+1];
+	strcpy(tmp,str);
+	std::locale loc;
+	std::use_facet<std::ctype<char>>(loc).tolower(tmp,tmp+sizeof(tmp));
+	std::cout << tmp;
+	return std::string(tmp);
 }

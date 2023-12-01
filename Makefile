@@ -41,7 +41,7 @@ obj/%.ml: $(ML_DIR)/src/%.cpp $(ML_DIR)/inc/%.h
 
 # By default, only clean the objects from this project
 clean:
-	rm -f $(TRAIN_OBJ) $(TARGET_FULL_PATH)
+	rm -f $(TRAIN_OBJ_FULL_PATH) $(TARGET_FULL_PATH)
 
 clean_la:
 	rm -f $(LA_OBJ_FULL_PATH)
@@ -56,11 +56,14 @@ clean_all:
 
 all: $(TARGET_FULL_PATH)
 
+linear_args = inputs/prev.nn inputs/dataset.td outputs/out.nn 100
+xor_args = outputs/forxor.nn inputs/xor_dataset.td outputs/forxor.nn 100
+
 run: $(TARGET_FULL_PATH) clean_saves
-	$(TARGET_FULL_PATH) inputs/prev.nn inputs/dataset.td outputs/out.nn 100
+	$(TARGET_FULL_PATH) $(xor_args)
 
 debug: $(TARGET_FULL_PATH)
-	gdb -x gdb_cmd --args $(TARGET_FULL_PATH) inputs/prev.nn inputs/dataset.td outputs/out.nn 100
+	gdb -x gdb_cmd --args $(TARGET_FULL_PATH) $(xor_args) --silent
 
 clean_saves:
 	rm -f outputs/out.nn

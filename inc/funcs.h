@@ -18,7 +18,14 @@
 #define DATASET_INDEX			(2)
 #define NET_OUTFILE_INDEX		(3)
 #define NUM_ITERATIONS_INDEX	(4)
+#define PRINT_BOOL_INDEX		(5)
+
 #define EXPECTED_NUM_ARGS		(5)
+
+/**
+ * @brief Prints the date and time on which the code was compiled to cout.
+ */
+void print_compile_date();
 
 /**
  * @brief Returns true if all elements of the input character array (assumes null-terminated) are numeric digits
@@ -34,5 +41,9 @@ MachineLearning::TrainingDataset make_empty_dataset(MachineLearning::uint num_in
 MachineLearning::TrainingDataset make_linear_dataset();
 
 void print_args(int _argc, char const **_argv);
+
+MachineLearning::TrainingDataset make_xor_dataset();
+
+std::string tolower(const char * str);
 
 #endif // FUNCS_H
