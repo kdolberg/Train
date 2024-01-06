@@ -29,6 +29,30 @@ std::string tock(){
 	return ss.str();
 }
 
+namespace train {
+	template <typename T>
+	int load(const T& t, const char * filename) {
+		if (strlen(filename) <= MAX_FILENAME_LENGTH) {
+			return MachineLearning::load(t,filename);
+		} else {
+			std::invalid_argument e("The filename \"" + std::string(filename) + "\" is too long.\n");
+			throw e;
+			return 0;
+		}
+	}
+
+	template <typename T>
+	int save(const T& t, const char * filename) {
+		if (strlen(filename) <= MAX_FILENAME_LENGTH) {
+			return MachineLearning::save(t,filename);
+		} else {
+			std::invalid_argument e("The filename \"" + std::string(filename) + "\" is too long.\n");
+			throw e;
+			return 0;
+		}
+	}
+}
+
 int main(int argc, char * const argv[]) {
 	print_compile_date();
 
@@ -42,10 +66,44 @@ int main(int argc, char * const argv[]) {
 	// }
 
 	// This is where we start our refactor
+	int opt = 0;
 
+	char arg_opts[] = ARG_OPTS;
+
+	MachineLearning::TrainingDataset td;
+	MachineLearning::Net n;
+	char output_net_filename[MAX_FILENAME_LENGTH];
+
+	try {
+		while ((opt = getopt(argc,argv,arg_opts)) != -1) {
+			if (opt == INPUT_NET ) {
+
+			}else if (opt == INPUT_TD) {
+				MachineLearning::load(td,optarg);
+			}else if (opt == OUTPUT_NET) {
+				strcpy(output_net_filename,optarg);
+			}else if (opt == SET_LEARNING_RATE) {
+
+			}else if (opt == MIN_ERROR) {
+
+			}else if (opt == NUM_EPOCHS) {
+
+			}else if (opt == HELP) {
+
+			}else {
+				assert(false);
+				std::cerr << "I don't know what, but something went wrong\n";
+				return -1;
+			}
+			std::cout << (char)opt << " = " << optarg << std::endl;
+		}
+	} catch (std::exception& e) {
+		std::cerr << "ERROR: " << e.what() << std::endl;
+		return -1;
+	}
 
 	/*DON'T CHANGE ANY OF THE STUFF BELOW JUST YET!*/
-	
+
 	// MachineLearning::scalar min_error = 0.1f;
 	// MachineLearning::scalar Erms = 1+min_error;
 	// MachineLearning::uint print_interval = num_epochs/10;
