@@ -31,25 +31,27 @@ std::string tock(){
 
 namespace train {
 	template <typename T>
-	int load(const T& t, const char * filename) {
-		if (strlen(filename) <= MAX_FILENAME_LENGTH) {
-			return MachineLearning::load(t,filename);
+	int load(T& t, const char * filename) {
+		auto ret = MachineLearning::load(t,filename);
+		if (ret) {
+			std::cout << filename << " loaded successfully.\n";
 		} else {
-			std::invalid_argument e("The filename \"" + std::string(filename) + "\" is too long.\n");
+			std::invalid_argument e(std::string(filename) + " could not be loaded.\n");
 			throw e;
-			return 0;
 		}
+		return ret;
 	}
 
 	template <typename T>
 	int save(const T& t, const char * filename) {
-		if (strlen(filename) <= MAX_FILENAME_LENGTH) {
-			return MachineLearning::save(t,filename);
+		auto ret = MachineLearning::save(t,filename);
+		if (ret) {
+			std::cout << filename << " saved successfully.\n";
 		} else {
-			std::invalid_argument e("The filename \"" + std::string(filename) + "\" is too long.\n");
+			std::invalid_argument e(std::string(filename) + " could not be saved.\n");
 			throw e;
-			return 0;
 		}
+		return ret;
 	}
 }
 
@@ -72,24 +74,29 @@ int main(int argc, char * const argv[]) {
 
 	MachineLearning::TrainingDataset td;
 	MachineLearning::Net n;
-	char output_net_filename[MAX_FILENAME_LENGTH];
-
+	std::string output_net_filename = "outfile.nn";
+	MachineLearning::scalar learning_rate = -1;
+	MachineLearning::scalar min_error = 0.0f;
+	MachineLearning::uint num_epochs = 100;
 	try {
 		while ((opt = getopt(argc,argv,arg_opts)) != -1) {
-			if (opt == INPUT_NET ) {
-
+			if (opt == INPUT_NET) {
+				train::load(n,optarg);
 			}else if (opt == INPUT_TD) {
-				MachineLearning::load(td,optarg);
+				train::load(td,optarg);
 			}else if (opt == OUTPUT_NET) {
-				strcpy(output_net_filename,optarg);
+				output_net_filename.clear();
+				output_net_filename = std::string(optarg);
 			}else if (opt == SET_LEARNING_RATE) {
-
+				#warning Make sure this line is safe
+				learning_rate = atof(optarg);
 			}else if (opt == MIN_ERROR) {
-
+				min_error = atof(optarg);
 			}else if (opt == NUM_EPOCHS) {
-
+				num_epochs = atoi(optarg);
 			}else if (opt == HELP) {
-
+				std::cout << "Unfortunately, the help section hasn't been made yet. You're helpless.\n";
+				return 0;
 			}else {
 				assert(false);
 				std::cerr << "I don't know what, but something went wrong\n";
@@ -97,38 +104,35 @@ int main(int argc, char * const argv[]) {
 			}
 			std::cout << (char)opt << " = " << optarg << std::endl;
 		}
+
+		MachineLearning::scalar Erms = 1+min_error;
+		MachineLearning::uint print_interval = num_epochs/10;
+		if (learning_rate > 0) {
+			n.learning_rate = learning_rate;
+			std::cout << "The learning rate has been changed by the user. This change will be saved in the neural net file.\n";
+		}
+		std::cout << "The learning rate is " << n.learning_rate << ".\n";
+		tick();
+		for (MachineLearning::uint i = 0; (i < num_epochs) && (Erms > min_error); ++i) {
+			if((i % print_interval) == 0) {
+				Erms = sqrt(2*n.learn(td));
+				std::cout << "Iteration " << i << ":\tErms = " << Erms << "\tDuration = " << tock() << std::endl;
+				train::save(n,output_net_filename.c_str());
+			} else {
+				n.learn(td);
+			}
+		}
+		std::cout << "Training complete.\n";
+		if(train::save(n,output_net_filename.c_str())) {
+			std::cout << "Saved neural net as \"" << output_net_filename.c_str() << "\".\n";
+		} else {
+			std::cerr << "Could not save neural net as \"" << output_net_filename.c_str() << "\".\n";
+			return 1;
+		}
 	} catch (std::exception& e) {
 		std::cerr << "ERROR: " << e.what() << std::endl;
 		return -1;
 	}
-
-	/*DON'T CHANGE ANY OF THE STUFF BELOW JUST YET!*/
-
-	// MachineLearning::scalar min_error = 0.1f;
-	// MachineLearning::scalar Erms = 1+min_error;
-	// MachineLearning::uint print_interval = num_epochs/10;
-	// tick();
-	// for (MachineLearning::uint i = 0; (i < num_epochs) && (Erms > min_error); ++i) {
-	// 	if((i % print_interval) == 0) {
-	// 		Erms = sqrt(2*n.learn(td));
-	// 		std::cout << "Iteration " << i << ":\tErms = " << Erms << "\tDuration = " << tock() << std::endl;
-	// 		if(MachineLearning::save(n,argv[NET_OUTFILE_INDEX])) {
-	// 			std::cout << "Saved neural net as \"" << argv[NET_OUTFILE_INDEX] << "\".\n";
-	// 		} else {
-	// 			std::cerr << "Could not save neural net as \"" << argv[NET_OUTFILE_INDEX] << "\".\n";
-	// 			return 1;
-	// 		}
-	// 	} else {
-	// 		n.learn(td);
-	// 	}
-	// }
-	// std::cout << "Training complete.\n";
-	// if(MachineLearning::save(n,argv[NET_OUTFILE_INDEX])) {
-	// 	std::cout << "Saved neural net as \"" << argv[NET_OUTFILE_INDEX] << "\".\n";
-	// } else {
-	// 	std::cerr << "Could not save neural net as \"" << argv[NET_OUTFILE_INDEX] << "\".\n";
-	// 	return 1;
-	// }
 
 	// if(argc >= PRINT_BOOL_INDEX) {
 	// 	if (tolower(argv[PRINT_BOOL_INDEX]) == std::string("true")) {
