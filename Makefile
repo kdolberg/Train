@@ -8,8 +8,10 @@ LA_DIR = $(ML_DIR)/LinearAlgebra
 LA_OBJ = la_basic_types.la la_matrix.la la_matrix_like.la la_vector.la la_vector_overloads.la
 LA_OBJ_FULL_PATH = $(patsubst la_%.la, obj/la_%.la, $(LA_OBJ))
 
+TRAIN_SRC_FULL_PATH = $(wildcard src/*.cpp)
+
 # Train objects
-TRAIN_OBJ = main.o funcs.o
+TRAIN_OBJ = $(patsubst src/%.cpp,%.o,$(TRAIN_SRC_FULL_PATH))
 TRAIN_OBJ_FULL_PATH = $(patsubst %.o, obj/%.o, $(TRAIN_OBJ))
 TARGET = train.exe
 BIN_DIR = ./bin
@@ -68,4 +70,10 @@ debug: $(TARGET_FULL_PATH)
 clean_saves:
 	rm -f outputs/out.nn
 
-.PHONY: clean run all clean_la la ml clean_ml debug clean_all clean_saves
+obj:
+	@echo $(ALL_OBJ)
+
+update_compile_date:
+	touch src/compile_date.cpp
+
+.PHONY: clean run all clean_la la ml clean_ml debug clean_all clean_saves obj update_compile_date

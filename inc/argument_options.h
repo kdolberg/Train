@@ -5,10 +5,16 @@
 #define INPUT_TD				't'
 #define OUTPUT_NET				'o'
 #define SET_LEARNING_RATE		'l'
+#define MIN_ERROR				'm'
+#define HELP 					'h'
+#define NUM_EPOCHS 				'e'
 
-#define INPUT_NET_LONG			"innet"
-#define INPUT_TD_LONG			"td"
-#define OUTPUT_NET_LONG			"outnet"
-#define SET_LEARNING_RATE_LONG  "learnrate"
+#define LONG_INPUT_NET			"innet"
+#define LONG_INPUT_TD			"td"
+#define LONG_OUTPUT_NET			"outnet"
+#define LONG_SET_LEARNING_RATE  "learnrate"
+#define LONG_MIN_ERROR			"minerror"
+#define LONG_HELP				"help"
+#define LONG_NUM_EPOCHS			"epochs"
 
 #endif // ARGUMENT_OPTIONS_H

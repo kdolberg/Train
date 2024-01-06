@@ -1,9 +1,10 @@
 #include <cctype>
 #include <locale>
+#include "compile_date.h"
 #include "funcs.h"
 
 void print_compile_date() {
-	std::cout << "Compiled " << __DATE__ << " " << __TIME__ << std::endl;
+	std::cout << "Compiled on " << compile_date() << std::endl;
 }
 
 bool is_integer(const unsigned char * s) {
