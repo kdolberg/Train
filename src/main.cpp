@@ -17,26 +17,6 @@ static auto end = std::chrono::high_resolution_clock::now();
 void tick(){
 	start = std::chrono::high_resolution_clock::now();
 }
-// /**
-//  * Returns the std::stringstream that is used to output the results of tick() and tock()
-//  */
-// std::stringstream& get_stream(){
-// 	return ss;
-// }
-
-// /**
-//  * Adds the difference between start and end to the stringstream (ss)
-//  */
-// void to_stream(){
-// 	ss << (std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()*0.001) << " microseconds";
-// }
-
-// /**
-//  * Prints the contents of the stringstream.
-//  */
-// void print_ticktock(){
-// 	std::cout << ss.str();
-// }
 
 /**
  * Stops the stop watch
