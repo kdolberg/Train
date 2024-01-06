@@ -45,12 +45,8 @@ int main(int argc, char const *argv[]) {
 		std::cerr << "Expected " << (EXPECTED_NUM_ARGS-1) << " arguments, but received " << (argc-1) << ".\nExiting.\n";
 		return 1;
 	}
-	// PRINT_VAR(n_prev);
 	
 	MachineLearning::Net n;
-	// MachineLearning::load(n,"prev.nn");
-	// PRINT_VAR(n);
-	// PRINT_VAR((n==n_prev));
 	if(!MachineLearning::load(n,argv[NET_INDEX])) {
 		std::cerr << "\"" << argv[NET_INDEX] << "\" is not a valid neural net file.\n";
 		return 1;
