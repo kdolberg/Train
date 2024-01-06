@@ -1,6 +1,54 @@
 #include <math.h>
 #include "main.h"
 
+#include <chrono>
+#include <iostream>
+#include <sstream>
+
+#define MEASURE_DURATION(CMD) tick();CMD;tock();get_stream()<<#CMD<<":\t";to_stream();
+
+static auto start = std::chrono::high_resolution_clock::now();
+static auto end = std::chrono::high_resolution_clock::now();
+// static std::stringstream ss;
+
+/**
+ * Starts the stop watch
+ */
+void tick(){
+	start = std::chrono::high_resolution_clock::now();
+}
+// /**
+//  * Returns the std::stringstream that is used to output the results of tick() and tock()
+//  */
+// std::stringstream& get_stream(){
+// 	return ss;
+// }
+
+// /**
+//  * Adds the difference between start and end to the stringstream (ss)
+//  */
+// void to_stream(){
+// 	ss << (std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()*0.001) << " microseconds";
+// }
+
+// /**
+//  * Prints the contents of the stringstream.
+//  */
+// void print_ticktock(){
+// 	std::cout << ss.str();
+// }
+
+/**
+ * Stops the stop watch
+ */
+std::string tock(){
+	end = std::chrono::high_resolution_clock::now();
+	std::stringstream ss;
+	ss << (std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()*(1e-9)) << " seconds";
+	tick();
+	return ss.str();
+}
+
 int main(int argc, char const *argv[]) {
 	print_compile_date();
 
@@ -42,10 +90,20 @@ int main(int argc, char const *argv[]) {
 		std::cerr << "\"" << argv[NUM_ITERATIONS_INDEX] << "\" is not an integer.\n";
 		return 1;
 	}
+	MachineLearning::scalar min_error = 0.1f;
+	MachineLearning::scalar Erms = 1+min_error;
 	MachineLearning::uint print_interval = num_epochs/10;
-	for (MachineLearning::uint i = 0; i < num_epochs; ++i) {
+	tick();
+	for (MachineLearning::uint i = 0; (i < num_epochs) && (Erms > min_error); ++i) {
 		if((i % print_interval) == 0) {
-			std::cout << "Iteration " << i << ": sqrt(2*E) = " << sqrt(2*n.learn(td)) << std::endl;
+			Erms = sqrt(2*n.learn(td));
+			std::cout << "Iteration " << i << ":\tErms = " << Erms << "\tDuration = " << tock() << std::endl;
+			if(MachineLearning::save(n,argv[NET_OUTFILE_INDEX])) {
+				std::cout << "Saved neural net as \"" << argv[NET_OUTFILE_INDEX] << "\".\n";
+			} else {
+				std::cerr << "Could not save neural net as \"" << argv[NET_OUTFILE_INDEX] << "\".\n";
+				return 1;
+			}
 		} else {
 			n.learn(td);
 		}
