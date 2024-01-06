@@ -1,4 +1,7 @@
 # MachineLearning objects
+
+.DEFAULT_GOAL := default
+
 ML_DIR = ./MachineLearning
 ML_OBJ = activation_function.ml layer.ml net.ml save_load.ml types.ml
 ML_OBJ_FULL_PATH = $(patsubst %.ml, obj/%.ml, $(ML_OBJ))
@@ -26,6 +29,9 @@ CXXFLAGS = -std=c++23 -Wall -g -O2 -MMD -MP
 
 # Includes
 INCLUDES = -I. -I./inc -I./$(ML_DIR) -I./$(ML_DIR)/inc -I./../UnitTest/ -I./../UnitTest/inc -I./../confirm/inc -I./../confirm -I./$(LA_DIR)
+
+DEP = $(wildcard obj/*.d)
+include $(DEP)
 
 # Rule for target
 $(TARGET_FULL_PATH): $(ALL_OBJ)
@@ -76,4 +82,9 @@ obj:
 update_compile_date:
 	touch src/compile_date.cpp
 
-.PHONY: clean run all clean_la la ml clean_ml debug clean_all clean_saves obj update_compile_date
+dep:
+	@echo $(DEP)
+
+default: update_compile_date $(TARGET_FULL_PATH)
+
+.PHONY: clean run all clean_la la ml clean_ml debug clean_all clean_saves obj update_compile_date dep default
