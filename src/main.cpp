@@ -34,7 +34,7 @@ std::string tock(){
 namespace train {
 	template <typename T>
 	int load(T& t, const char * filename) {
-		auto ret = MachineLearning::load(t,filename);
+		auto ret = ml::load(t,filename);
 		if (ret) {
 			std::cout << filename << " loaded successfully.\n";
 		} else {
@@ -46,7 +46,7 @@ namespace train {
 
 	template <typename T>
 	int save(const T& t, const char * filename) {
-		auto ret = MachineLearning::save(t,filename);
+		auto ret = ml::save(t,filename);
 		if (ret) {
 			// std::cout << filename << " saved successfully.\n";
 		} else {
@@ -57,6 +57,19 @@ namespace train {
 	}
 }
 
+ml::scalar find_error_delta(ml::scalar curr_error, Filter f) {
+	static ml::scalar prev_error = -1;
+	ml::scalar ret = -1;
+
+	if (prev_error > 0) {
+		ret = f(prev_error-curr_error);
+	}
+
+	prev_error = curr_error;
+
+	return ret;
+}
+
 int main(int argc, char * const argv[]) {
 	print_compile_date();
 
@@ -65,15 +78,15 @@ int main(int argc, char * const argv[]) {
 
 	char arg_opts[] = ARG_OPTS;
 
-	MachineLearning::TrainingDataset td;
-	MachineLearning::Net n;
+	ml::TrainingDataset td;
+	ml::Net n;
 	std::string output_net_filename = "outfile.nn";
-	MachineLearning::scalar learning_rate = -1;
-	MachineLearning::scalar min_error = 0.0f;
-	MachineLearning::uint num_epochs = 100;
+	ml::scalar learning_rate = -1;
+	ml::scalar min_error = 0.0f;
+	ml::uint num_epochs = 100;
 	bool dynamic_learning_rate = false;
-	MachineLearning::uint filter_length = 0;
-	MachineLearning::scalar meta_learning_rate = 0;
+	ml::uint filter_length = 0;
+	ml::scalar meta_learning_rate = 0.1;
 	try {
 		while ((opt = getopt(argc,argv,arg_opts)) != -1) {
 			if (opt == INPUT_NET) {
@@ -105,8 +118,8 @@ int main(int argc, char * const argv[]) {
 			std::cout << (char)opt << " = " << optarg << std::endl;
 		}
 
-		MachineLearning::scalar Erms = 1+min_error, E;
-		MachineLearning::uint print_interval = num_epochs/10;
+		ml::scalar Erms = 1+min_error, E;
+		ml::uint print_interval = num_epochs/10;
 
 		if (learning_rate > 0) {
 			n.learning_rate = learning_rate;
@@ -115,32 +128,35 @@ int main(int argc, char * const argv[]) {
 			learning_rate = n.learning_rate;
 		}
 		std::cout << "The learning rate is " << n.learning_rate << ".\n";
+		if (dynamic_learning_rate) {
+			std::cout << "Dynamic learning rate with filter length " << filter_length << ", and meta learning rate " << meta_learning_rate << std::endl;
+		}
 		n.load_training_data(td);
 
 		Filter f1(filter_length),f2(filter_length);
-		MachineLearning::scalar Eavg1=0,Eavg2=0,h=1e-5;
+		ml::scalar E_avg_nominal,E_avg_plus_h;
+		ml::scalar h=1e-5;
 
 		tick();
-		for (MachineLearning::uint i = 0; (i < num_epochs) && (Erms > min_error); ++i) {
-			n.learning_rate = (dynamic_learning_rate && !(i%2)) ? learning_rate : learning_rate+h;
-			E = n.learn();
+		for (ml::uint i = 0; (i < num_epochs) && (Erms > min_error); ++i) {
 
-			if(dynamic_learning_rate) {
-				if (!(i%2)) {
-					Eavg1 = f1(E);
-				} else {
-					Eavg2 = f2(E);
-					learning_rate += (i > filter_length) ? meta_learning_rate*(Eavg2-Eavg1)/h : 0.0f;
-					if (learning_rate < MIN_LEARNING_RATE) {
-						learning_rate = MIN_LEARNING_RATE;
-					}
-				}
-			}
+			n.learning_rate = (dynamic_learning_rate && i%2) ? learning_rate+h : learning_rate;
+			E = n.learn();
 
 			if((i % print_interval) == 0) {
 				Erms = sqrt(2*E);
 				std::cout << "Iteration " << i << ":\tErms = " << Erms << "\tlr = " << learning_rate << "\tDuration = " << tock() << std::endl;
 				train::save(n,output_net_filename.c_str());
+			}
+
+			if (dynamic_learning_rate && i%2) {
+				E_avg_plus_h = find_error_delta(E,f2);
+			} else {
+				E_avg_nominal = find_error_delta(E,f1);
+			}
+
+			if(dynamic_learning_rate && i > 2) {
+				learning_rate += meta_learning_rate*(E_avg_plus_h-E_avg_nominal)/h;
 			}
 		}
 		std::cout << "Training complete.\n";
