@@ -1,17 +1,7 @@
-#include <math.h>
 #include "main.h"
-
-#include <chrono>
-#include <iostream>
-#include <sstream>
-
-#define MEASURE_DURATION(CMD) tick();CMD;tock();get_stream()<<#CMD<<":\t";to_stream();
-
-#define MIN_LEARNING_RATE 1e-8
 
 static auto start = std::chrono::high_resolution_clock::now();
 static auto end = std::chrono::high_resolution_clock::now();
-// static std::stringstream ss;
 
 /**
  * Starts the stop watch
@@ -81,36 +71,41 @@ int main(int argc, char * const argv[]) {
 	ml::TrainingDataset td;
 	ml::Net n;
 	std::string output_net_filename = "outfile.nn";
-	ml::scalar learning_rate = -1;
+	ml::scalar learning_rate = -1000.0f;
 	ml::scalar min_error = 0.0f;
+	ml::scalar min_learning_rate = 0.0f;
 	ml::uint num_epochs = 100;
 	bool dynamic_learning_rate = false;
 	ml::uint filter_length = 0;
 	ml::scalar meta_learning_rate = 0.1;
+	bool learning_rate_user_defined = false;
 	try {
 		while ((opt = getopt(argc,argv,arg_opts)) != -1) {
 			if (opt == INPUT_NET) {
 				train::load(n,optarg);
-			}else if (opt == INPUT_TD) {
+			} else if (opt == INPUT_TD) {
 				train::load(td,optarg);
-			}else if (opt == OUTPUT_NET) {
+			} else if (opt == OUTPUT_NET) {
 				output_net_filename.clear();
 				output_net_filename = std::string(optarg);
-			}else if (opt == SET_LEARNING_RATE) {
+			} else if (opt == SET_LEARNING_RATE) {
+				learning_rate_user_defined = true;
 				learning_rate = std::stof(optarg);
-			}else if (opt == MIN_ERROR) {
+			} else if (opt == MIN_ERROR) {
 				min_error = std::stof(optarg);
-			}else if (opt == NUM_EPOCHS) {
+			} else if (opt == NUM_EPOCHS) {
 				num_epochs = std::stoi(optarg);
-			}else if (opt == DYNAMIC_LR) {
+			} else if (opt == DYNAMIC_LR) {
 				dynamic_learning_rate = true;
 				filter_length = std::stoi(optarg);
 			} else if (opt == META_LR) {
 				meta_learning_rate = std::stof(optarg);
-			}else if (opt == HELP) {
+			} else if (opt == MIN_LEARNING_RATE) {
+				min_learning_rate = std::stof(optarg);
+			} else if (opt == HELP) {
 				std::cout << "Unfortunately, the help section hasn't been made yet. You're helpless.\n";
 				return 0;
-			}else {
+			} else {
 				assert(false);
 				std::cerr << "I don't know what, but something went wrong\n";
 				return -1;
@@ -121,16 +116,19 @@ int main(int argc, char * const argv[]) {
 		ml::scalar Erms = 1+min_error, E;
 		ml::uint print_interval = num_epochs/10;
 
-		if (learning_rate > 0) {
+		if (learning_rate_user_defined) {
 			n.learning_rate = learning_rate;
-			std::cout << "The learning rate has been changed by the user. This change will be saved in the neural net file.\n";
+			std::cout << "The user-defined learning rate is ";
 		} else {
 			learning_rate = n.learning_rate;
+			std::cout << "The learning rate loaded from the neural net file is ";
 		}
-		std::cout << "The learning rate is " << n.learning_rate << ".\n";
+		std::cout << learning_rate << ".\n";
+		
 		if (dynamic_learning_rate) {
 			std::cout << "Dynamic learning rate with filter length " << filter_length << ", and meta learning rate " << meta_learning_rate << std::endl;
 		}
+
 		n.load_training_data(td);
 
 		Filter f1(filter_length),f2(filter_length);
@@ -140,7 +138,7 @@ int main(int argc, char * const argv[]) {
 		tick();
 		for (ml::uint i = 0; (i < num_epochs) && (Erms > min_error); ++i) {
 
-			n.learning_rate = (dynamic_learning_rate && i%2) ? learning_rate+h : learning_rate;
+			n.learning_rate = ((dynamic_learning_rate && i%2) ? learning_rate+h : learning_rate);
 			E = n.learn();
 
 			if((i % print_interval) == 0) {
@@ -155,8 +153,9 @@ int main(int argc, char * const argv[]) {
 				E_avg_nominal = find_error_delta(E,f1);
 			}
 
-			if(dynamic_learning_rate && i > 2) {
-				learning_rate += meta_learning_rate*(E_avg_plus_h-E_avg_nominal)/h;
+			if(dynamic_learning_rate && i > filter_length) {
+				learning_rate += meta_learning_rate*(E_avg_plus_h/h - E_avg_nominal/h);
+				learning_rate = std::min(learning_rate,min_learning_rate);
 			}
 		}
 		std::cout << "Training complete.\n";

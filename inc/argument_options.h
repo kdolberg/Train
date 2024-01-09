@@ -9,6 +9,7 @@
 #define NUM_EPOCHS 			('e')
 #define DYNAMIC_LR			('d')
 #define META_LR				('q')
+#define MIN_LEARNING_RATE	('r')
 
 #define HELP 				('h')
 
@@ -22,6 +23,7 @@
 							NUM_EPOCHS,COLON,\
 							DYNAMIC_LR,COLON,\
 							META_LR,COLON,\
+							MIN_LEARNING_RATE,COLON,\
 							HELP}
 
 #define MAX_FILENAME_LENGTH 255
