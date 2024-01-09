@@ -6,8 +6,11 @@
 #define OUTPUT_NET			('o')
 #define SET_LEARNING_RATE	('l')
 #define MIN_ERROR			('m')
-#define HELP 				('h')
 #define NUM_EPOCHS 			('e')
+#define DYNAMIC_LR			('d')
+#define META_LR				('q')
+
+#define HELP 				('h')
 
 #define COLON				(':')
 
@@ -17,6 +20,8 @@
 							SET_LEARNING_RATE,COLON,\
 							MIN_ERROR,COLON,\
 							NUM_EPOCHS,COLON,\
+							DYNAMIC_LR,COLON,\
+							META_LR,COLON,\
 							HELP}
 
 #define MAX_FILENAME_LENGTH 255

@@ -28,7 +28,7 @@ CXX = g++
 CXXFLAGS = -std=c++23 -Wall -g -O2 -MMD -MP
 
 # Includes
-INCLUDES = -I. -I./inc -I./$(ML_DIR) -I./$(ML_DIR)/inc -I./../UnitTest/ -I./../UnitTest/inc -I./../confirm/inc -I./../confirm -I./$(LA_DIR)
+INCLUDES = -I. -I./inc -I./$(ML_DIR) -I./$(ML_DIR)/inc -I./../UnitTest/ -I./../UnitTest/inc -I./../confirm/inc -I./../confirm -I./$(LA_DIR) -I./$(LA_DIR)/inc
 
 DEP = $(wildcard obj/*.d)
 include $(DEP)

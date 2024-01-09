@@ -7,6 +7,8 @@
 
 #define MEASURE_DURATION(CMD) tick();CMD;tock();get_stream()<<#CMD<<":\t";to_stream();
 
+#define MIN_LEARNING_RATE 1e-8
+
 static auto start = std::chrono::high_resolution_clock::now();
 static auto end = std::chrono::high_resolution_clock::now();
 // static std::stringstream ss;
@@ -46,7 +48,7 @@ namespace train {
 	int save(const T& t, const char * filename) {
 		auto ret = MachineLearning::save(t,filename);
 		if (ret) {
-			std::cout << filename << " saved successfully.\n";
+			// std::cout << filename << " saved successfully.\n";
 		} else {
 			std::invalid_argument e(std::string(filename) + " could not be saved.\n");
 			throw e;
@@ -57,15 +59,6 @@ namespace train {
 
 int main(int argc, char * const argv[]) {
 	print_compile_date();
-
-	// if (argc==1) {
-	// 	std::cout << "No arguments received. Generating synthetic data.\n";
-	// 	MachineLearning::Net n_prev(MachineLearning::NetDef({2,2,1}),true);
-	// 	MachineLearning::save(n_prev,"outputs/forxor.nn");
-	// 	MachineLearning::save(make_linear_dataset(),"inputs/dataset.td");
-	// 	MachineLearning::save(make_xor_dataset(),"inputs/xor_dataset.td");
-	// 	return 0;
-	// }
 
 	// This is where we start our refactor
 	int opt = 0;
@@ -78,6 +71,9 @@ int main(int argc, char * const argv[]) {
 	MachineLearning::scalar learning_rate = -1;
 	MachineLearning::scalar min_error = 0.0f;
 	MachineLearning::uint num_epochs = 100;
+	bool dynamic_learning_rate = false;
+	MachineLearning::uint filter_length = 0;
+	MachineLearning::scalar meta_learning_rate = 0;
 	try {
 		while ((opt = getopt(argc,argv,arg_opts)) != -1) {
 			if (opt == INPUT_NET) {
@@ -88,12 +84,16 @@ int main(int argc, char * const argv[]) {
 				output_net_filename.clear();
 				output_net_filename = std::string(optarg);
 			}else if (opt == SET_LEARNING_RATE) {
-				#warning Make sure this line is safe
-				learning_rate = atof(optarg);
+				learning_rate = std::stof(optarg);
 			}else if (opt == MIN_ERROR) {
-				min_error = atof(optarg);
+				min_error = std::stof(optarg);
 			}else if (opt == NUM_EPOCHS) {
-				num_epochs = atoi(optarg);
+				num_epochs = std::stoi(optarg);
+			}else if (opt == DYNAMIC_LR) {
+				dynamic_learning_rate = true;
+				filter_length = std::stoi(optarg);
+			} else if (opt == META_LR) {
+				meta_learning_rate = std::stof(optarg);
 			}else if (opt == HELP) {
 				std::cout << "Unfortunately, the help section hasn't been made yet. You're helpless.\n";
 				return 0;
@@ -105,21 +105,42 @@ int main(int argc, char * const argv[]) {
 			std::cout << (char)opt << " = " << optarg << std::endl;
 		}
 
-		MachineLearning::scalar Erms = 1+min_error;
+		MachineLearning::scalar Erms = 1+min_error, E;
 		MachineLearning::uint print_interval = num_epochs/10;
+
 		if (learning_rate > 0) {
 			n.learning_rate = learning_rate;
 			std::cout << "The learning rate has been changed by the user. This change will be saved in the neural net file.\n";
+		} else {
+			learning_rate = n.learning_rate;
 		}
 		std::cout << "The learning rate is " << n.learning_rate << ".\n";
+		n.load_training_data(td);
+
+		Filter f1(filter_length),f2(filter_length);
+		MachineLearning::scalar Eavg1=0,Eavg2=0,h=1e-5;
+
 		tick();
 		for (MachineLearning::uint i = 0; (i < num_epochs) && (Erms > min_error); ++i) {
+			n.learning_rate = (dynamic_learning_rate && !(i%2)) ? learning_rate : learning_rate+h;
+			E = n.learn();
+
+			if(dynamic_learning_rate) {
+				if (!(i%2)) {
+					Eavg1 = f1(E);
+				} else {
+					Eavg2 = f2(E);
+					learning_rate += (i > filter_length) ? meta_learning_rate*(Eavg2-Eavg1)/h : 0.0f;
+					if (learning_rate < MIN_LEARNING_RATE) {
+						learning_rate = MIN_LEARNING_RATE;
+					}
+				}
+			}
+
 			if((i % print_interval) == 0) {
-				Erms = sqrt(2*n.learn(td));
-				std::cout << "Iteration " << i << ":\tErms = " << Erms << "\tDuration = " << tock() << std::endl;
+				Erms = sqrt(2*E);
+				std::cout << "Iteration " << i << ":\tErms = " << Erms << "\tlr = " << learning_rate << "\tDuration = " << tock() << std::endl;
 				train::save(n,output_net_filename.c_str());
-			} else {
-				n.learn(td);
 			}
 		}
 		std::cout << "Training complete.\n";
@@ -133,15 +154,5 @@ int main(int argc, char * const argv[]) {
 		std::cerr << "ERROR: " << e.what() << std::endl;
 		return -1;
 	}
-
-	// if(argc >= PRINT_BOOL_INDEX) {
-	// 	if (tolower(argv[PRINT_BOOL_INDEX]) == std::string("true")) {
-	// 		MachineLearning::TrainingDataset test_results = {td.x, n(td.x)};
-	// 		std::cout << "Test results:\n";
-	// 		std::cout << test_results << std::endl;
-	// 	}
-	// } else {
-	// 	std::cout << "Closing\n";
-	// }
 	return 0;
 }

@@ -7,5 +7,6 @@
 
 #include "funcs.h"
 #include "argument_options.h"
+#include "filter.h"
 
 #endif // MAIN_H
