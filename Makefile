@@ -36,6 +36,7 @@ include $(DEP)
 # Rule for target
 $(TARGET_FULL_PATH): $(ALL_OBJ)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(ALL_OBJ) -o $(TARGET_FULL_PATH)
+	@echo -e "\a"
 
 obj/%.o: src/%.cpp inc/%.h
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@

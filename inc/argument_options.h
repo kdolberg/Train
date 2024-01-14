@@ -1,6 +1,8 @@
 #ifndef ARGUMENT_OPTIONS_H
 #define ARGUMENT_OPTIONS_H
 
+#include "machine_learning.h"
+
 #define INPUT_NET			('n')
 #define INPUT_TD			('t')
 #define OUTPUT_NET			('o')
@@ -10,6 +12,7 @@
 #define DYNAMIC_LR			('d')
 #define META_LR				('q')
 #define MIN_LEARNING_RATE	('r')
+#define PRINT_INTERVAL		('p')
 
 #define HELP 				('h')
 
@@ -24,16 +27,26 @@
 							DYNAMIC_LR,COLON,\
 							META_LR,COLON,\
 							MIN_LEARNING_RATE,COLON,\
+							PRINT_INTERVAL,COLON,\
 							HELP}
 
 #define MAX_FILENAME_LENGTH 255
 
-// #define LONG_INPUT_NET			"innet"
-// #define LONG_INPUT_TD			"td"
-// #define LONG_OUTPUT_NET			"outnet"
-// #define LONG_SET_LEARNING_RATE  "learnrate"
-// #define LONG_MIN_ERROR			"minerror"
-// #define LONG_HELP				"help"
-// #define LONG_NUM_EPOCHS			"epochs"
+typedef struct {
+	ml::TrainingDataset td;
+	ml::Net n;
+	std::string output_net_filename = "outfile.nn";
+	ml::scalar learning_rate = -1000.0f;
+	ml::scalar min_error = 0.0f;
+	ml::scalar min_learning_rate = 0.0f;
+	ml::uint num_epochs = 100;
+	bool dynamic_learning_rate = false;
+	ml::uint filter_length = 0;
+	ml::scalar meta_learning_rate = 0.1;
+	bool learning_rate_user_defined = false;
+	ml::uint print_interval = 10;
+} ArgumentOptionOutputs;
+
+ArgumentOptionOutputs parse_command_line_arguments(int argc, char * const argv[]);
 
 #endif // ARGUMENT_OPTIONS_H
