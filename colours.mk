@@ -1,0 +1,23 @@
+# For colouring output text
+
+CL1=\033[0;34m
+CL2=\033[0;35m
+NC=\033[0m# No Colour
+
+DEFAULT		= \033[39m
+BLACK		= \033[30m
+DRK_RED		= \033[31m
+DRK_GREEN	= \033[32m
+DRK_YELLOW	= \033[33m
+DRK_BLUE	= \033[34m
+DRK_MAGENTA	= \033[35m
+DRK_CYAN	= \033[36m
+LGT_GRAY	= \033[37m
+DRK_GRAY	= \033[90m
+RED			= \033[91m
+GREEN		= \033[92m
+ORANGE		= \033[93m
+BLUE		= \033[94m
+MAGENTA		= \033[95m
+CYAN		= \033[96m
+WHITE		= \033[97m
