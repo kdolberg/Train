@@ -99,9 +99,6 @@ all_obj: $(OBJECTS)
 clean_all:
 	rm -f $(OBJECTS) $(DEP)
 
-ndebug:
-	$(MAKE) -f Makefile_ndebug.mk
-
 ifdef MAKEFILES
 makes:
 	@echo $(MAKEFILES)
