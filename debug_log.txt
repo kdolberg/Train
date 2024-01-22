@@ -1,0 +1,11 @@
+Compiled on Jan 20 2024 18:09:46
+data/net.nn loaded successfully.
+n = data/net.nn
+o = data/debug_out.nn
+data/td.td loaded successfully.
+t = data/td.td
+e = 100
+l = 0.1
+p = 100
+The user-defined learning rate is 0.1.
+    0:          lr = 1.000000e-01          Erms = 5.659838e-01          Dur = 1.046076e+01 seconds          dErms = 0.000000e+00          dErms/dt = 0.000000e+00 Hz

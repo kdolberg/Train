@@ -1,9 +1,12 @@
+[submodule "lib/UnitTest"]
+	path = lib/UnitTest
+	url = git@github.com:kdolberg/UnitTest.git
 [submodule "lib/MachineLearning"]
 	path = lib/MachineLearning
-	url = https://github.com/kdolberg/MachineLearning.git
+	url = git@github.com:kdolberg/MachineLearning
 [submodule "lib/LinearAlgebra"]
 	path = lib/LinearAlgebra
-	url = https://github.com/kdolberg/LinearAlgebra.git
+	url = git@github.com:kdolberg/LinearAlgebra
 [submodule "lib/confirm"]
 	path = lib/confirm
-	url = https://github.com/kdolberg/confirm.git
+	url = git@github.com:kdolberg/confirm

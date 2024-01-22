@@ -20,7 +20,7 @@ LIBDIR = lib
 FOLDERS = $(BINDIR) $(DOCDIR) $(OBJDIR) $(INCDIR) $(SANDIR) $(SRCDIR) $(LIBDIR)
 
 # Define repositories
-LIBRARIES = MachineLearning MachineLearning/LinearAlgebra MachineLearning/LinearAlgebra/confirm ../UnitTest
+LIBRARIES = $(wildcard lib/*)
 REPOS = . $(LIBRARIES)
 VPATH = $(REPOS)
 
@@ -29,7 +29,7 @@ DEP = $(wildcard $(OBJDIR)/*.d)
 include $(DEP)
 
 # Setup includes
-_INCLUDE = $(INCDIR) $(addsuffix /inc,$(REPOS)) $(REPOS)
+_INCLUDE = $(addsuffix /inc,$(REPOS)) lib/LinearAlgebra
 # Includes with the "-I" prefix added
 INCLUDES = $(addprefix -I,$(_INCLUDE))
 
@@ -47,13 +47,13 @@ OBJECTS = $(patsubst %.cpp,%$(OFX),$(addprefix $(OBJDIR)/, $(notdir $(SRC))))
 # Rule to make the main target executable
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(BINDIR)
-	@echo -e "Building $(CL2)$(notdir $@)$(NC) (prereqs: $(CL2)$(sort $(notdir $^))$(NC))"
+	@echo -e "Building $(COL)$(notdir $@)$(NC) (prereqs: $(COL)$(sort $(notdir $^))$(NC))"
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJECTS) -o $(TARGET)
 	@echo "done."
 
 # Rule to make each object
 $(OBJDIR)/%$(OFX): $(SRCDIR)/%.cpp $(INCDIR)/%.h
-	@echo -e "Building $(CL1)$(notdir $@)$(NC) (prereqs: $(CL1)$(notdir $^)$(NC)) ... "
+	@echo -e "Building $(COL)$(notdir $@)$(NC) (prereqs: $(COL)$(notdir $^)$(NC)) ... "
 	@mkdir -p $(OBJDIR) $(OBJDIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
@@ -66,13 +66,6 @@ clean:
 	rm -f $(OBJECTS) $(TARGET)
 
 all: $(TARGET)
-
-# Set the arguments with which to run the executable
-ARGS = 1000
-
-# Run the executable
-run: $(TARGET)
-	./$(TARGET).exe $(ARGS)
 
 # Debug the executable using gdb
 debug: $(TARGET)
@@ -98,6 +91,12 @@ all_obj: $(OBJECTS)
 
 clean_all:
 	rm -f $(OBJECTS) $(DEP)
+
+include args.mk
+
+# Run the executable
+run: $(TARGET)
+	$(TARGET) $(ARGS)
 
 ifdef MAKEFILES
 makes:

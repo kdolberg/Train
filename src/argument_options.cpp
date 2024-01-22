@@ -49,6 +49,7 @@ ArgumentOptionOutputs parse_command_line_arguments(int argc, char * const argv[]
 	} catch (std::exception& e) {
 		std::cerr << "An error occured while parsing the argument options:\n";
 		std::cerr << e.what();
+		exit(1);
 	}
 	return ret;
 }

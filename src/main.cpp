@@ -40,12 +40,17 @@ int main(int argc, char * const argv[]) {
 		options.learning_rate = std::max(options.learning_rate,options.min_learning_rate);
 
 		options.n.learning_rate = ((options.dynamic_learning_rate && i%2) ? options.learning_rate+h : options.learning_rate);
-
+		
 		e_metalearning.start();
-		E = options.n.learn();
+		try {
+			E = options.n.learn();
+		} catch (std::exception& e) {
+			std::cerr << "An error occurred during iteration " << i << " of training:\n";
+			std::cerr << "\t" << e.what() << std::endl;
+		}
 		e_metalearning.stop();
 
-		if((i % options.print_interval)==0 && i!=0) {
+		if((i % options.print_interval)==0) {
 			e_output.start();
 			Erms = sqrt(2*E);
 			std::cout << std::setw(WIDTH_BETWEEN/2) << std::setfill(' ') << i << ":";
@@ -69,8 +74,8 @@ int main(int argc, char * const argv[]) {
 			delta_E_avg_nominal = f2(e_metalearning.delta());
 		}
 
-		if(options.dynamic_learning_rate && i > options.filter_length) {
-			options.learning_rate += options.meta_learning_rate*(delta_E_avg_plus_h/h - delta_E_avg_nominal/h);
+		if(options.dynamic_learning_rate) {
+			options.learning_rate -= options.meta_learning_rate*(delta_E_avg_plus_h/h - delta_E_avg_nominal/h);
 		}
 	// }
 	// std::cout << "Training complete.\n";
